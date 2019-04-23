@@ -2,24 +2,26 @@ Class {
 	#name : #CoffeeMachine,
 	#superclass : #Object,
 	#instVars : [
-		'lcdDisplay',
-		'badgeReader',
-		'distanceSensor',
 		'leds',
 		'buttons',
-		'machineState'
+		'machineStateListCodes'
 	],
 	#category : #CoffeeMachine
 }
 
+{ #category : #control }
+CoffeeMachine >> brewCoffee: anInteger [
+	| coffeeOption |
+	coffeeOption := #coffee , anInteger asString.
+	buttons pressButton: coffeeOption.
+	^ 'brewing' , coffeeOption
+]
+
 { #category : #initialization }
 CoffeeMachine >> initialize [
-	lcdDisplay := CMLCD new.
-	badgeReader := CMBadgeReader new.
-	distanceSensor := CMDistanceSensor new.
 	buttons := CMButtons new.
 	leds := CMLeds new.
-	machineState := {(#'0000' -> 'powerOff').
+	machineStateListCodes := {(#'0000' -> 'powerOff').
 	(#'0002' -> 'standyBy').
 	(#'2000' -> 'brewingCoffee1').
 	(#'0200' -> 'brewingCoffee2').
@@ -30,76 +32,58 @@ CoffeeMachine >> initialize [
 ]
 
 { #category : #state }
-CoffeeMachine >> isOn [ 
-   "read leds from the buttons"
-	"if the machine is on"
-	"tempIsOn := true."
-	"^tempIsOn"
+CoffeeMachine >> isOff [
+	self machineState = 'powerOff'
+		ifTrue: [ ^ true ]
+		ifFalse: [ ^ false ]
+]
+
+{ #category : #state }
+CoffeeMachine >> isOn [
+	| machineState |
+	machineState := self machineState.
+	machineState = 'powerOff'
+		ifTrue: [ ^ false ]
+		ifFalse: [ machineState = 'stadyBy'
+				ifTrue: [ ^ false ]
+				ifFalse: [ ^ true ] ]
+]
+
+{ #category : #state }
+CoffeeMachine >> isReady [
+	self machineState = 'isReady'
+		ifTrue: [ ^ true ]
+		ifFalse: [ ^ false ]
 ]
 
 { #category : #control }
 CoffeeMachine >> machineState [
-	
 	| machineStateCode |
-	
 	machineStateCode := self machineStateCode.
-	
-		
-	
-	
-	
-	"
-	^ self buttonState: 'coffee2'.	
-	^ self buttonState: 'coffee3'.
-	^ self buttonState: 'water'.
-	^ self buttonState: 'coffee'.
-	^ self buttonState: 'garbage'.
-	^ self buttonState: 'error'.
-	"
-	^ machineState at: machineStateCode ifAbsent: [ self error: 'State ',machineStateCode asString,' not found' ]
+	^ machineStateListCodes
+		at: machineStateCode
+		ifAbsent: [ self error: 'State ' , machineStateCode asString , ' not found' ]
 ]
 
 { #category : #control }
 CoffeeMachine >> machineStateCode [
-	
-	|ledsState machineStateCode|
-	
+	| ledsState machineStateCode |
 	ledsState := leds ledsState.
-	machineStateCode := 
-		(ledsState at:#coffee1)asString,
-		(ledsState at:#coffee2) asString,
-		(ledsState at:#coffee3) asString,
-		(ledsState at:#power) asString.
-	
+	machineStateCode := (ledsState at: #coffee1) asString
+		, (ledsState at: #coffee2) asString
+		, (ledsState at: #coffee3) asString
+		, (ledsState at: #power) asString.
 	^ machineStateCode
-	
-	
-	
-	"
-	^ self buttonState: 'coffee2'.	
-	^ self buttonState: 'coffee3'.
-	^ self buttonState: 'water'.
-	^ self buttonState: 'coffee'.
-	^ self buttonState: 'garbage'.
-	^ self buttonState: 'error'.
-	"
-	
-	
+]
+
+{ #category : #control }
+CoffeeMachine >> turnOff [
+	"check machine state, if off try to turn on"
+	self isOn ifFalse: [ ^ true ] ifTrue: [ buttons pressButton:#power. ^'turningOff' ]
 ]
 
 { #category : #control }
 CoffeeMachine >> turnOn [
-	"check machine state"
-
-	"press the power button"
-	
-	
-	
-	
-	
-	
-	"[ (Delay forSeconds: 5) wait.
-	  tempIsOn := true. ]forkNamed: 'turningMachineOn'."
-
-	
+	"check machine state, if off try to turn on"
+	self isOn ifFalse: [ buttons pressButton:#power. ^'turningOn' ] ifTrue: [ ^ true ]
 ]

@@ -9,38 +9,28 @@ Class {
 
 { #category : #initialization }
 CoffeeMachineManager >> initialize [
-	coffeeMachine := CoffeeMachine new
+	coffeeMachine := CoffeeMachineDevices new
 	
+]
+
+{ #category : #state }
+CoffeeMachineManager >> putReady [
+	coffeeMachine isOff
+		ifFalse: [ coffeeMachine isReady
+				whileFalse: [ coffeeMachine isOn whileFalse: [ coffeeMachine turnOn ] ] ]
+		ifTrue: [ ^ 'powerOff' ]
 ]
 
 { #category : #initialization }
 CoffeeMachineManager >> start [
 	[ "waiting for badge"
-		tempAuthenticated whileFalse: [ (Delay forSeconds: 1) wait ].
+		"authenticated whileFalse: [ (Delay forSeconds: 1) wait ]."
 		
-		tempIsOn whileFalse:  [ self turnOn ].
+		self putReady.
 		
-		
-		
-		
+		coffeeMachine brewCoffee: 2. 
 		
 		
-		coffeeMachine isOn 
-			ifFalse: [ 
-				| tries |
-				coffeeMachine turnOn.
-				tries := 0.
-				[(coffeeMachine isOn not) and: [ tries < 10 ]] 
-					whileTrue: [
-						tries := tries + 1. 
-						(Delay forSeconds: 1) wait.
-						Transcript show: 'waiting...';cr. ]
-				 ].
-			
-			(coffeeMachine isOn) 
-				ifTrue: [  ] 
-				ifFalse: [  ].
-			
-			    Transcript show: 'Coffee machine is ', coffeeMachine isOn asString.
+		
 	 ] forkNamed: 'CoffeeMachineManagerMain'
 ]
