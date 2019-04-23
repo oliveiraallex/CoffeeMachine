@@ -13,18 +13,20 @@ Class {
 }
 
 { #category : #initialization }
-CoffeeMachine >> initialize [ 
+CoffeeMachine >> initialize [
 	lcdDisplay := CMLCD new.
 	badgeReader := CMBadgeReader new.
 	distanceSensor := CMDistanceSensor new.
 	buttons := CMButtons new.
-	leds := CMLeds new. 
-	
-	machineState :=
-		{ #'0000' -> 'powerOff'.
-		  #'0002' -> 'standyBy'.
-		  #'2000' -> 'brewingCoffee1'.
-		 } asDictionary .
+	leds := CMLeds new.
+	machineState := {(#'0000' -> 'powerOff').
+	(#'0002' -> 'standyBy').
+	(#'2000' -> 'brewingCoffee1').
+	(#'0200' -> 'brewingCoffee2').
+	(#'0020' -> 'brewingCoffee3').
+	(#'2220' -> 'preparing').
+	(#'1110' -> 'ready')} asDictionary.
+	self flag: 'refactor later'
 ]
 
 { #category : #state }
