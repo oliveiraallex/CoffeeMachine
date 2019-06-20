@@ -22,7 +22,7 @@ CoffeeMachine >> initialize [
 	buttons := CMButtons new.
 	leds := CMLeds new.
 	machineStateListCodes := {(#'0000' -> 'powerOff').
-	(#'0002' -> 'standyBy').
+	(#'0002' -> 'standBy').
 	(#'2000' -> 'brewingCoffee1').
 	(#'0200' -> 'brewingCoffee2').
 	(#'0020' -> 'brewingCoffee3').
@@ -44,14 +44,21 @@ CoffeeMachine >> isOn [
 	machineState := self machineState.
 	machineState = 'powerOff'
 		ifTrue: [ ^ false ]
-		ifFalse: [ machineState = 'stadyBy'
+		ifFalse: [ machineState = 'standyBy'
 				ifTrue: [ ^ false ]
 				ifFalse: [ ^ true ] ]
 ]
 
 { #category : #state }
 CoffeeMachine >> isReady [
-	self machineState = 'isReady'
+	self machineState = 'ready'
+		ifTrue: [ ^ true ]
+		ifFalse: [ ^ false ]
+]
+
+{ #category : #testing }
+CoffeeMachine >> isStandBy [
+	self machineState = 'standBy'
 		ifTrue: [ ^ true ]
 		ifFalse: [ ^ false ]
 ]
@@ -79,11 +86,11 @@ CoffeeMachine >> machineStateCode [
 { #category : #control }
 CoffeeMachine >> turnOff [
 	"check machine state, if off try to turn on"
-	self isOn ifFalse: [ ^ true ] ifTrue: [ buttons pressButton:#power. ^'turningOff' ]
+	self isStandBy ifTrue: [ ^ true ] ifFalse: [ buttons pressButton:#power. ^'turningOff' ]
 ]
 
 { #category : #control }
 CoffeeMachine >> turnOn [
-	"check machine state, if off try to turn on"
-	self isOn ifFalse: [ buttons pressButton:#power. ^'turningOn' ] ifTrue: [ ^ true ]
+	"check machine state, if on try to turn off"
+	self isReady ifTrue: [ ^ true ] ifFalse: [ buttons pressButton:#power. ^'turningOn' ] 
 ]
